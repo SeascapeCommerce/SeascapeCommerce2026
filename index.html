@@ -658,9 +658,15 @@ footer{background:var(--black-true);border-top:1px solid rgba(46,220,240,.07);pa
     </div>
     <h2 class="cta-title reveal">Unleash Your<br><em>Online Potential</em></h2>
     <p class="cta-sub reveal reveal-delay-1">Experience seamless online business management with Seascape Commerce — your partner in launching and scaling success in the digital marketplace.</p>
-   <div class="cta-email-form reveal reveal-delay-2" id="contact">
+   <style>
+  .cta-input::placeholder {
+    color: #cccccc;
+    opacity: 1;
+  }
+</style>
+    <div class="cta-email-form reveal reveal-delay-2" id="contact">
   <form action="https://formspree.io/f/mbdenpja" method="POST">
-    <input type="email" name="email" class="cta-input" placeholder="your@[email.com]" required>
+    <input type="email" name="email" class="cta-input" placeholder="Your Email-->Example [seahorses@gmail.com]" required>
     <textarea 
       name="message" 
       class="cta-input" 
