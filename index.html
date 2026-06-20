@@ -72,7 +72,18 @@ nav.scrolled{background:rgba(6,12,24,.92);backdrop-filter:blur(20px);border-bott
 .video-placeholder-label{font-family:var(--mono);font-size:.7rem;letter-spacing:.2em;color:var(--cyan);text-transform:uppercase;position:relative;z-index:1;}
 .video-placeholder-sub{font-family:var(--body);font-size:.8rem;color:var(--silver);position:relative;z-index:1;text-align:center;max-width:320px;}
 /* Corner HUD brackets */
- <iframe
+<section class="video-block">
+  <div style="
+    position: relative;
+    width: 100%;
+    max-width: 900px;
+    padding-bottom: 56.25%;
+    height: 0;
+    overflow: hidden;
+    border: 2px solid rgba(46,220,240,.25);
+    background: #0a0f1e;
+    margin: 0 auto;">
+    <iframe
       src="https://www.youtube.com/embed/Pwp7grkTKLA"
       title="Seascape Commerce"
       frameborder="0"
@@ -86,6 +97,7 @@ nav.scrolled{background:rgba(6,12,24,.92);backdrop-filter:blur(20px);border-bott
         height: 100%;
         border: 0;">
     </iframe>
+  </div>
   
 /* To embed a real video: replace the .video-wrapper contents with: */
 /* <video src="YOUR_VIDEO_PATH.mp4" controls autoplay muted loop style="width:100%;height:100%;object-fit:cover"></video> */
