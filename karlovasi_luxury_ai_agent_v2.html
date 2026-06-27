@@ -1,0 +1,376 @@
+
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300&family=Jost:wght@300;400;500&display=swap');
+  :root {
+    --k-gold: #C9A84C; --k-gold-lt: #E8D5A3; --k-onyx: #0E0E0E;
+    --k-charcoal: #1C1C1E; --k-mid: #2A2A2C; --k-muted: #6B6B6E;
+    --k-border: rgba(201,168,76,0.22); --k-border-bright: rgba(201,168,76,0.55);
+    --k-text: #F0EDE6; --k-text-dim: #A8A49C; --k-radius: 16px;
+  }
+  #kv-root {
+    font-family:'Jost',sans-serif; background:var(--k-charcoal);
+    border-radius:20px; border:1px solid var(--k-border);
+    overflow:hidden; display:flex; flex-direction:column;
+    height:640px; max-height:640px; position:relative;
+  }
+  #kv-ambient { position:absolute; inset:0; pointer-events:none; z-index:0; overflow:hidden; }
+  #kv-ambient::before {
+    content:''; position:absolute; top:-120px; left:-80px;
+    width:420px; height:420px;
+    background:radial-gradient(ellipse,rgba(201,168,76,0.09) 0%,transparent 70%);
+    border-radius:50%; animation:ambientDrift 12s ease-in-out infinite alternate;
+  }
+  #kv-ambient::after {
+    content:''; position:absolute; bottom:-60px; right:-60px;
+    width:340px; height:340px;
+    background:radial-gradient(ellipse,rgba(201,168,76,0.06) 0%,transparent 70%);
+    border-radius:50%; animation:ambientDrift 16s ease-in-out infinite alternate-reverse;
+  }
+  @keyframes ambientDrift { from{transform:translate(0,0) scale(1)} to{transform:translate(30px,20px) scale(1.12)} }
+  #kv-header {
+    position:relative; z-index:2; display:flex; align-items:center; gap:14px;
+    padding:18px 22px 14px; border-bottom:1px solid var(--k-border);
+    background:rgba(14,14,14,0.6); backdrop-filter:blur(8px); flex-shrink:0;
+  }
+  #kv-avatar {
+    width:44px; height:44px; border-radius:50%;
+    background:linear-gradient(135deg,#1a1a1a 0%,#2a2a2a 100%);
+    border:1.5px solid var(--k-gold); display:flex; align-items:center;
+    justify-content:center; position:relative; flex-shrink:0;
+  }
+  #kv-avatar svg { width:22px; height:22px; }
+  #kv-pulse {
+    position:absolute; inset:-4px; border-radius:50%;
+    border:1.5px solid rgba(201,168,76,0.4);
+    animation:pulse 2.8s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100%{transform:scale(1);opacity:0.6} 50%{transform:scale(1.25);opacity:0} }
+  #kv-agent-info { flex:1; min-width:0; }
+  #kv-agent-name {
+    font-family:'Cormorant Garamond',serif; font-size:17px; font-weight:600;
+    letter-spacing:0.04em; color:var(--k-gold); line-height:1.2;
+  }
+  #kv-agent-title { font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:var(--k-text-dim); margin-top:2px; }
+  #kv-status-dot {
+    width:8px; height:8px; border-radius:50%; background:#4CAF82; flex-shrink:0;
+    box-shadow:0 0 8px rgba(76,175,130,0.5); animation:statusPulse 3s ease-in-out infinite;
+  }
+  @keyframes statusPulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+  #kv-divider {
+    height:1px; flex-shrink:0;
+    background:linear-gradient(90deg,transparent 0%,var(--k-gold) 30%,var(--k-gold) 70%,transparent 100%);
+    opacity:0.18;
+  }
+  #kv-messages {
+    flex:1; overflow-y:auto; overflow-x:hidden; padding:20px 18px 8px;
+    display:flex; flex-direction:column; gap:14px;
+    position:relative; z-index:1; scroll-behavior:smooth;
+  }
+  #kv-messages::-webkit-scrollbar{width:4px}
+  #kv-messages::-webkit-scrollbar-track{background:transparent}
+  #kv-messages::-webkit-scrollbar-thumb{background:var(--k-border-bright);border-radius:4px}
+  .kv-msg { display:flex; gap:10px; align-items:flex-end; animation:msgSlide 0.38s cubic-bezier(0.34,1.56,0.64,1) both; }
+  @keyframes msgSlide { from{opacity:0;transform:translateY(18px) scale(0.97)} to{opacity:1;transform:none} }
+  .kv-msg.user { flex-direction:row-reverse; }
+  .kv-bubble {
+    max-width:78%; padding:12px 16px; border-radius:18px;
+    font-size:14px; line-height:1.65; color:var(--k-text);
+    white-space:pre-wrap;
+  }
+  .kv-msg.agent .kv-bubble {
+    background:rgba(201,168,76,0.08); border:1px solid var(--k-border);
+    border-bottom-left-radius:5px;
+  }
+  .kv-msg.user .kv-bubble {
+    background:rgba(201,168,76,0.16); border:1px solid rgba(201,168,76,0.35);
+    border-bottom-right-radius:5px;
+  }
+  .kv-mini-avatar {
+    width:28px; height:28px; border-radius:50%; flex-shrink:0;
+    border:1px solid var(--k-border-bright);
+    background:linear-gradient(135deg,#1a1a1a,#2a2a2a);
+    display:flex; align-items:center; justify-content:center;
+    font-size:10px; color:var(--k-gold); font-weight:500; letter-spacing:0;
+  }
+  #kv-typing { display:none; align-items:flex-end; gap:10px; animation:msgSlide 0.3s ease both; }
+  #kv-typing.visible { display:flex; }
+  .kv-typing-bubble {
+    background:rgba(201,168,76,0.08); border:1px solid var(--k-border);
+    border-radius:18px; border-bottom-left-radius:5px;
+    padding:14px 18px; display:flex; gap:5px; align-items:center;
+  }
+  .kv-dot {
+    width:6px; height:6px; border-radius:50%; background:var(--k-gold);
+    animation:typingBounce 1.2s ease-in-out infinite;
+  }
+  .kv-dot:nth-child(2){animation-delay:.18s} .kv-dot:nth-child(3){animation-delay:.36s}
+  @keyframes typingBounce { 0%,60%,100%{transform:translateY(0);opacity:.4} 30%{transform:translateY(-7px);opacity:1} }
+  #kv-quick {
+    padding:8px 18px 4px; display:flex; flex-wrap:wrap; gap:7px;
+    position:relative; z-index:2; flex-shrink:0;
+  }
+  .kv-quick-btn {
+    font-family:'Jost',sans-serif; font-size:11.5px; font-weight:400;
+    letter-spacing:0.04em; padding:6px 14px; border-radius:100px;
+    background:rgba(201,168,76,0.07); border:1px solid var(--k-border-bright);
+    color:var(--k-gold-lt); cursor:pointer; transition:all 0.2s ease;
+  }
+  .kv-quick-btn:hover { background:rgba(201,168,76,0.18); border-color:var(--k-gold); transform:translateY(-1px); }
+  #kv-input-area {
+    padding:12px 18px 18px; display:flex; gap:10px; align-items:flex-end;
+    position:relative; z-index:2; flex-shrink:0;
+    border-top:1px solid var(--k-border); background:rgba(14,14,14,0.5);
+  }
+  #kv-input {
+    flex:1; background:rgba(255,255,255,0.05); border:1px solid var(--k-border);
+    border-radius:14px; padding:11px 16px; font-family:'Jost',sans-serif;
+    font-size:14px; color:var(--k-text); outline:none; resize:none;
+    min-height:44px; max-height:120px; line-height:1.5; transition:border-color 0.2s;
+  }
+  #kv-input::placeholder{color:var(--k-muted)}
+  #kv-input:focus{border-color:var(--k-border-bright)}
+  #kv-send {
+    width:44px; height:44px; border-radius:50%;
+    background:linear-gradient(135deg,#C9A84C 0%,#9A7830 100%);
+    border:none; cursor:pointer; display:flex; align-items:center; justify-content:center;
+    flex-shrink:0; transition:all 0.2s ease; box-shadow:0 2px 12px rgba(201,168,76,0.28);
+  }
+  #kv-send:hover{transform:scale(1.08);box-shadow:0 4px 18px rgba(201,168,76,0.4)}
+  #kv-send:active{transform:scale(0.96)}
+  #kv-send svg{width:18px;height:18px;fill:#0E0E0E}
+  #kv-footer {
+    text-align:center; padding:8px; font-size:10px; letter-spacing:0.1em;
+    text-transform:uppercase; color:var(--k-muted); flex-shrink:0;
+    border-top:1px solid rgba(201,168,76,0.07);
+  }
+  #kv-footer span{color:var(--k-gold);opacity:.7}
+  .kv-gold-line{width:32px;height:1px;background:var(--k-gold);opacity:.4;display:inline-block;vertical-align:middle;margin:0 6px}
+  #kv-loading-overlay {
+    position:absolute; inset:0; background:var(--k-charcoal);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:24px; z-index:10; transition:opacity 0.6s ease;
+  }
+  #kv-loading-overlay.fade{opacity:0;pointer-events:none}
+  .kv-loader-logo {
+    font-family:'Cormorant Garamond',serif; font-size:28px; font-weight:300;
+    letter-spacing:.28em; color:var(--k-gold); text-transform:uppercase;
+  }
+  .kv-loader-sub{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--k-text-dim)}
+  .kv-loader-bar{width:160px;height:1px;background:rgba(201,168,76,.15);border-radius:2px;overflow:hidden}
+  .kv-loader-fill{height:100%;width:0;background:var(--k-gold);animation:loaderFill 1.8s ease forwards;border-radius:2px}
+  @keyframes loaderFill{from{width:0}to{width:100%}}
+  #kv-notice {
+    margin:8px 18px 0; padding:10px 14px; border-radius:10px;
+    background:rgba(201,168,76,0.07); border:1px solid var(--k-border);
+    font-size:12px; color:var(--k-text-dim); line-height:1.6; flex-shrink:0;
+    display:none;
+  }
+  #kv-notice.show{display:block}
+  #kv-notice strong{color:var(--k-gold-lt)}
+  #kv-endpoint-bar {
+    margin:8px 18px 0; display:flex; gap:8px; align-items:center;
+    flex-shrink:0;
+  }
+  #kv-endpoint {
+    flex:1; background:rgba(255,255,255,0.04); border:1px solid var(--k-border);
+    border-radius:10px; padding:8px 12px; font-family:'Jost',sans-serif;
+    font-size:12px; color:var(--k-text-dim); outline:none;
+  }
+  #kv-endpoint:focus{border-color:var(--k-border-bright)}
+  #kv-endpoint::placeholder{color:var(--k-muted);font-size:11.5px}
+  #kv-set-btn {
+    padding:8px 14px; border-radius:10px; border:1px solid var(--k-border-bright);
+    background:rgba(201,168,76,0.1); color:var(--k-gold-lt); cursor:pointer;
+    font-family:'Jost',sans-serif; font-size:12px; white-space:nowrap;
+    transition:all .2s;
+  }
+  #kv-set-btn:hover{background:rgba(201,168,76,.2)}
+  #kv-endpoint-status{font-size:11px;color:var(--k-muted);padding:2px 18px 0;flex-shrink:0}
+  #kv-endpoint-status.ok{color:#4CAF82}
+  #kv-endpoint-status.err{color:#f87}
+</style>
+
+<div id="kv-root">
+  <div id="kv-ambient"></div>
+
+  <div id="kv-loading-overlay">
+    <div class="kv-loader-logo">KarloVasi</div>
+    <div class="kv-loader-sub">Luxury Automotive</div>
+    <div class="kv-loader-bar"><div class="kv-loader-fill"></div></div>
+    <div style="font-size:11px;color:var(--k-muted);letter-spacing:.1em">Preparing your concierge experience…</div>
+  </div>
+
+  <div id="kv-header">
+    <div id="kv-avatar">
+      <div id="kv-pulse"></div>
+      <svg viewBox="0 0 24 24" fill="none" stroke="#C9A84C" stroke-width="1.4" stroke-linecap="round">
+        <circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/>
+      </svg>
+    </div>
+    <div id="kv-agent-info">
+      <div id="kv-agent-name">Aria · KarloVasi Concierge</div>
+      <div id="kv-agent-title">Luxury Vehicle Concierge AI</div>
+    </div>
+    <div id="kv-status-dot"></div>
+  </div>
+  <div id="kv-divider"></div>
+
+  <div id="kv-notice" class="show">
+    <strong>Connect your proxy to activate Aria.</strong> Paste your Vercel proxy URL below, then start chatting. 
+    (<a href="#" style="color:var(--k-gold);text-decoration:none" onclick="sendPrompt('Show me the Vercel setup steps for the KarloVasi agent');return false">Setup guide ↗</a>)
+  </div>
+
+  <div id="kv-endpoint-bar">
+    <input id="kv-endpoint" type="text" placeholder="https://your-proxy.vercel.app/api/chat" />
+    <button id="kv-set-btn">Connect</button>
+  </div>
+  <div id="kv-endpoint-status">No proxy connected</div>
+
+  <div id="kv-messages">
+    <div id="kv-typing">
+      <div class="kv-mini-avatar">A</div>
+      <div class="kv-typing-bubble">
+        <div class="kv-dot"></div><div class="kv-dot"></div><div class="kv-dot"></div>
+      </div>
+    </div>
+  </div>
+
+  <div id="kv-quick"></div>
+
+  <div id="kv-input-area">
+    <textarea id="kv-input" placeholder="Tell me what you're looking for…" rows="1" disabled></textarea>
+    <button id="kv-send" aria-label="Send" disabled style="opacity:.4">
+      <svg viewBox="0 0 24 24"><path d="M2 12L22 2 14 22 11 13 2 12Z"/></svg>
+    </button>
+  </div>
+
+  <div id="kv-footer"><span class="kv-gold-line"></span>Powered by <span>KarloVasi AI</span><span class="kv-gold-line"></span></div>
+</div>
+
+<script>
+(function(){
+  const QUICK_PROMPTS = [
+    "Most luxurious SUV under $200k",
+    "Best electric luxury sedan",
+    "Ultra-luxury chauffeur car",
+    "Aston Martin grand tourer",
+    "Performance luxury under $150k",
+    "Compare Rolls vs Bentley",
+  ];
+
+  let proxyUrl = '';
+  let history = [];
+  let isLoading = false;
+
+  const msgs = document.getElementById('kv-messages');
+  const typingEl = document.getElementById('kv-typing');
+  const inputEl = document.getElementById('kv-input');
+  const sendBtn = document.getElementById('kv-send');
+  const quickEl = document.getElementById('kv-quick');
+  const overlay = document.getElementById('kv-loading-overlay');
+  const noticeEl = document.getElementById('kv-notice');
+  const endpointEl = document.getElementById('kv-endpoint');
+  const setBtn = document.getElementById('kv-set-btn');
+  const statusEl = document.getElementById('kv-endpoint-status');
+
+  function scrollBottom(){ msgs.scrollTop = msgs.scrollHeight; }
+
+  function addMsg(role, text){
+    const isAgent = role === 'agent';
+    const div = document.createElement('div');
+    div.className = 'kv-msg ' + (isAgent ? 'agent' : 'user');
+    const av = document.createElement('div');
+    av.className = 'kv-mini-avatar';
+    av.textContent = isAgent ? 'A' : 'You';
+    av.style.fontSize = isAgent ? '11px' : '9px';
+    const bub = document.createElement('div');
+    bub.className = 'kv-bubble';
+    bub.textContent = text;
+    div.appendChild(av); div.appendChild(bub);
+    msgs.insertBefore(div, typingEl);
+    scrollBottom();
+  }
+
+  function showTyping(v){ typingEl.classList.toggle('visible',v); if(v) scrollBottom(); }
+
+  function enableInput(){
+    inputEl.disabled = false;
+    sendBtn.disabled = false;
+    sendBtn.style.opacity = '1';
+    inputEl.placeholder = 'Tell me what you\'re looking for…';
+  }
+
+  function buildQuick(){
+    quickEl.innerHTML = '';
+    QUICK_PROMPTS.forEach(q => {
+      const b = document.createElement('button');
+      b.className = 'kv-quick-btn'; b.textContent = q;
+      b.onclick = () => { inputEl.value = q; sendMessage(); quickEl.innerHTML = ''; };
+      quickEl.appendChild(b);
+    });
+  }
+
+  setBtn.onclick = function(){
+    const val = endpointEl.value.trim();
+    if(!val){ statusEl.textContent = 'Please enter a URL'; statusEl.className = 'err'; return; }
+    proxyUrl = val;
+    statusEl.textContent = 'Proxy connected — Aria is ready';
+    statusEl.className = 'ok';
+    noticeEl.classList.remove('show');
+    enableInput();
+    addMsg('agent', 'Welcome to KarloVasi. I\'m Aria, your personal Luxury Vehicle Concierge. I can help you discover the perfect vehicle — whether that\'s the pinnacle of ultra-luxury, an electrified flagship, or a performance grand tourer. What are you looking for today?');
+    buildQuick();
+  };
+
+  endpointEl.addEventListener('keydown', e => { if(e.key==='Enter') setBtn.click(); });
+
+  async function sendMessage(){
+    const text = inputEl.value.trim();
+    if(!text || isLoading || !proxyUrl) return;
+    isLoading = true;
+    inputEl.value = ''; inputEl.style.height = 'auto';
+    quickEl.innerHTML = '';
+    addMsg('user', text);
+    history.push({ role:'user', content:text });
+    showTyping(true);
+    sendBtn.style.opacity = '.4';
+
+    try {
+      const res = await fetch(proxyUrl, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ messages: history })
+      });
+      if(!res.ok){ throw new Error('HTTP ' + res.status); }
+      const data = await res.json();
+      const reply = (data.content||[]).map(b=>b.text||'').join('') || data.reply || '';
+      if(!reply) throw new Error('Empty response');
+      history.push({ role:'assistant', content:reply });
+      showTyping(false);
+      addMsg('agent', reply);
+    } catch(e){
+      showTyping(false);
+      addMsg('agent', 'I\'m having trouble reaching the server right now. Please ensure your Vercel proxy is deployed and the URL is correct, then try again.');
+      history.pop();
+    }
+
+    sendBtn.style.opacity = '1';
+    isLoading = false;
+    inputEl.focus();
+  }
+
+  sendBtn.onclick = sendMessage;
+  inputEl.addEventListener('keydown', e => {
+    if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(); }
+  });
+  inputEl.addEventListener('input', () => {
+    inputEl.style.height = 'auto';
+    inputEl.style.height = Math.min(inputEl.scrollHeight,120)+'px';
+  });
+
+  setTimeout(() => {
+    overlay.classList.add('fade');
+    setTimeout(() => overlay.remove(), 700);
+  }, 2000);
+})();
+</script>
