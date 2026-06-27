@@ -1028,8 +1028,9 @@ document.querySelectorAll('.reveal').forEach(el=>obs.observe(el));
 
 /* FAQ */
 document.querySelectorAll('.faq-q').forEach(q=>{q.addEventListener('click',()=>{const item=q.parentElement,wasOpen=item.classList.contains('open');document.querySelectorAll('.faq-item').forEach(i=>i.classList.remove('open'));if(!wasOpen)item.classList.add('open');});});
-</script>
-(function () {
+
+------------------
+  (function () {
   const CARD_SCROLL_HEIGHT = 500; // px of scroll travel per card transition
 
   const stack = document.getElementById('etlCardStack');
@@ -1123,5 +1124,9 @@ document.querySelectorAll('.faq-q').forEach(q=>{q.addEventListener('click',()=>{
 
   requestAnimationFrame(tick);
 })();
+
+
+</script>
+
 </body>
 </html>
